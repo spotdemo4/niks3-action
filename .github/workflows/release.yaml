@@ -1,0 +1,31 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+        with:
+          app_id: ${{ vars.CLIENT_ID }}
+          app_key: ${{ secrets.PRIVATE_KEY }}
+          fetch_depth: 0
+          shell: release
+
+      - name: Run flake-release
+        run: flake-release
+        env:
+          GITHUB_TOKEN: ${{ steps.checkout.outputs.token }}

@@ -1,0 +1,189 @@
+{
+  description = "niks3 action";
+
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.trev.zip/nur"
+    ];
+    extra-trusted-public-keys = [
+      "nur:70xGHUW1+1b8FqBchldaunN//pZNVo6FKuPL4U/n844="
+    ];
+  };
+
+  inputs = {
+    systems.url = "github:nix-systems/default";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    trev = {
+      url = "github:spotdemo4/nur";
+      inputs.systems.follows = "systems";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs =
+    {
+      nixpkgs,
+      trev,
+      ...
+    }:
+    trev.libs.mkFlake (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            trev.overlays.packages
+            trev.overlays.libs
+          ];
+        };
+        fs = pkgs.lib.fileset;
+        node = pkgs.nodejs_24;
+      in
+      {
+        devShells = {
+          default = pkgs.mkShell {
+            name = "dev";
+            shellHook = pkgs.shellhook.ref;
+            packages = with pkgs; [
+              # node
+              node
+
+              # lint
+              biome
+              nixfmt
+              prettier
+
+              # util
+              bumper
+              flake-release
+            ];
+          };
+
+          bump = pkgs.mkShell {
+            name = "bump";
+            packages = with pkgs; [
+              bumper
+            ];
+          };
+
+          release = pkgs.mkShell {
+            name = "release";
+            packages = with pkgs; [
+              flake-release
+            ];
+          };
+
+          update = pkgs.mkShell {
+            name = "update";
+            packages = with pkgs; [
+              renovate
+
+              # npm i
+              node
+            ];
+          };
+
+          vulnerable = pkgs.mkShell {
+            name = "vulnerable";
+            packages = with pkgs; [
+              # node
+              node
+
+              # nix
+              flake-checker
+
+              # actions
+              octoscan
+            ];
+          };
+        };
+
+        checks = pkgs.lib.mkChecks {
+          node = {
+            src = fs.toSource {
+              root = ./.;
+              fileset = fs.unions [
+                ./.gitignore
+                ./.npmignore
+                ./biome.json
+                ./package-lock.json
+                ./package.json
+                ./rolldown.config.ts
+                ./tsconfig.json
+                ./src
+              ];
+            };
+            deps = with pkgs; [
+              biome
+            ];
+            script = ''
+              biome ci
+            '';
+          };
+
+          nix = {
+            src = fs.toSource {
+              root = ./.;
+              fileset = fs.fileFilter (file: file.hasExt "nix") ./.;
+            };
+            deps = with pkgs; [
+              nixfmt-tree
+            ];
+            script = ''
+              treefmt --ci
+            '';
+          };
+
+          renovate = {
+            src = fs.toSource {
+              root = ./.github;
+              fileset = ./.github/renovate.json;
+            };
+            deps = with pkgs; [
+              renovate
+            ];
+            script = ''
+              renovate-config-validator renovate.json
+            '';
+          };
+
+          actions = {
+            src = fs.toSource {
+              root = ./.;
+              fileset = fs.unions [
+                ./action.yaml
+                ./.github/workflows
+              ];
+            };
+            deps = with pkgs; [
+              action-validator
+              octoscan
+            ];
+            script = ''
+              action-validator **/*.yaml
+              octoscan scan .
+            '';
+          };
+
+          prettier = {
+            src = fs.toSource {
+              root = ./.;
+              fileset = fs.fileFilter (file: file.hasExt "yaml" || file.hasExt "json" || file.hasExt "md") ./.;
+            };
+            deps = with pkgs; [
+              prettier
+            ];
+            script = ''
+              prettier --check .
+            '';
+          };
+        };
+
+        apps = pkgs.lib.mkApps {
+          dev.script = "npm run dev";
+        };
+
+        formatter = pkgs.nixfmt-tree;
+      }
+    );
+}

@@ -1,0 +1,47 @@
+name: check
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+
+      - name: Setup Niks3 cache
+        uses: spotdemo4/niks3-action@main
+        with:
+          server-url: https://niks3.trev.zip
+          auth-token: ${{ secrets.NIKS3_TOKEN }}
+
+      - name: Check flake
+        run: nix flake check
+
+  oidc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+
+      - name: Setup Niks3 cache
+        uses: spotdemo4/niks3-action@main
+        with:
+          audience: https://niks3.trev.zip
+
+      - name: Check flake
+        run: nix flake check

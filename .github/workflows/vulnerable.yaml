@@ -1,0 +1,43 @@
+name: vulnerable
+
+on:
+  schedule:
+    - cron: "0 9 * * 0" # every Sunday at 09:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+        with:
+          shell: vulnerable
+
+      - name: Run npm audit
+        run: npm audit --audit-level moderate
+
+  flake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+        with:
+          shell: vulnerable
+
+      - name: Run flake-checker
+        run: flake-checker -f
+
+  actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: spotdemo4/nix-init@d46add347bcb1af8755ab1d64493a63b6b18de2b # v1.25.3
+        with:
+          shell: vulnerable
+
+      - name: Run octoscan
+        run: octoscan scan .github

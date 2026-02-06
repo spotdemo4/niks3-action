@@ -1,0 +1,26 @@
+name: niks3-action
+description: Pushes uncached Nix packages to a binary cache with Niks3
+author: trev
+
+branding:
+  icon: chevron-up
+  color: yellow
+
+inputs:
+  server-url:
+    description: "Niks3 server URL for authentication"
+    required: false
+  auth-token:
+    description: "Niks3 authentication token for authentication"
+    required: false
+  audience:
+    description: "Niks3 audience for OIDC authentication"
+    required: false
+  inputs-from:
+    description: "Override the flake inputs of `github:Mic92/niks3`"
+    required: false
+
+runs:
+  using: node24
+  main: dist/init.js
+  post: dist/push.js
