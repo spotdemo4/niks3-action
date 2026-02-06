@@ -17502,13 +17502,14 @@ function getIDToken(aud) {
 //#endregion
 //#region src/nix.ts
 async function packages() {
-	const output = await getExecOutput("nix", [
+	const path_info = await getExecOutput("nix", [
 		"path-info",
 		"--all",
 		"--json",
-		"--json-format 2"
+		"--json-format",
+		"2"
 	], { silent: true });
-	const parsed = JSON.parse(output.stdout);
+	const parsed = JSON.parse(path_info.stdout);
 	const packages = [];
 	for (const [name, info] of Object.entries(parsed.info)) {
 		if (name.endsWith(".drv")) continue;

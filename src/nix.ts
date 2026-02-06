@@ -24,14 +24,14 @@ export type Package = Path & {
 };
 
 export async function packages() {
-	const output = await getExecOutput(
+	const path_info = await getExecOutput(
 		"nix",
-		["path-info", "--all", "--json", "--json-format 2"],
+		["path-info", "--all", "--json", "--json-format", "2"],
 		{
 			silent: true,
 		},
 	);
-	const parsed: { info: Record<string, Path> } = JSON.parse(output.stdout);
+	const parsed: { info: Record<string, Path> } = JSON.parse(path_info.stdout);
 
 	const packages: Package[] = [];
 	for (const [name, info] of Object.entries(parsed.info)) {
