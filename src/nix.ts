@@ -45,15 +45,7 @@ export async function packages() {
 export async function verify(name: string, pkg: Package, store: string) {
 	const code = await exec(
 		"nix",
-		[
-			"store",
-			"verify",
-			"--no-contents",
-			"--no-trust",
-			"--store",
-			store,
-			`${pkg.storeDir}/${name}`,
-		],
+		["path-info", "--store", store, `${pkg.storeDir}/${name}`],
 		{
 			silent: true,
 			ignoreReturnCode: true,

@@ -17624,10 +17624,7 @@ async function packages() {
 }
 async function verify(name, pkg, store) {
 	return await exec("nix", [
-		"store",
-		"verify",
-		"--no-contents",
-		"--no-trust",
+		"path-info",
 		"--store",
 		store,
 		`${pkg.storeDir}/${name}`
