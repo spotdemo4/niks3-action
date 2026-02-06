@@ -4,15 +4,15 @@ import type { Package } from "./nix.ts";
 import * as nix from "./nix.ts";
 
 async function main() {
+	core.info("Collecting packages");
 	const init: Package[] = JSON.parse(core.getState("packages"));
 	const now = await nix.packages();
 
-	const server_url = core.getState("server-url");
-	const auth_token = core.getState("auth-token");
-
+	core.info("Getting substituters");
 	const stores = await nix.substituters();
 	const packages: Package[] = [];
 
+	core.info("Verifying packages");
 	pkgLoop: for (const pkg of now) {
 		if (init.some((p) => p.narHash === pkg.narHash)) {
 			continue;
@@ -27,7 +27,10 @@ async function main() {
 		packages.push(pkg);
 	}
 
-	core.startGroup(`pushing ${packages.length} packages to cache`);
+	const server_url = core.getState("server-url");
+	const auth_token = core.getState("auth-token");
+
+	core.startGroup(`Pushing ${packages.length} packages to cache`);
 	for (const pkg of packages) {
 		await exec.exec("niks3", [
 			"push",

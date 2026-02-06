@@ -17521,15 +17521,18 @@ async function packages() {
 	return packages;
 }
 async function verify(pkg, store) {
-	const args = [
+	return await exec("nix", [
 		"store",
 		"verify",
 		"--no-contents",
 		"--no-trust",
+		"--store",
+		store,
 		`${pkg.storeDir}/${pkg.name}`
-	];
-	if (store) args.push("--store", store);
-	return await exec("nix", args, { silent: true }) === 0;
+	], {
+		silent: true,
+		ignoreReturnCode: true
+	}) === 0;
 }
 async function substituters() {
 	const configSubs = (await getExecOutput("nix", [

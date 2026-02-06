@@ -48,21 +48,23 @@ export async function packages() {
 	return packages;
 }
 
-export async function verify(pkg: Package, store?: string) {
-	const args = [
-		"store",
-		"verify",
-		"--no-contents",
-		"--no-trust",
-		`${pkg.storeDir}/${pkg.name}`,
-	];
-	if (store) {
-		args.push("--store", store);
-	}
-
-	const code = await exec("nix", args, {
-		silent: true,
-	});
+export async function verify(pkg: Package, store: string) {
+	const code = await exec(
+		"nix",
+		[
+			"store",
+			"verify",
+			"--no-contents",
+			"--no-trust",
+			"--store",
+			store,
+			`${pkg.storeDir}/${pkg.name}`,
+		],
+		{
+			silent: true,
+			ignoreReturnCode: true,
+		},
+	);
 	return code === 0;
 }
 
