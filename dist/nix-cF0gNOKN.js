@@ -17500,27 +17500,129 @@ function getIDToken(aud) {
 }
 
 //#endregion
+//#region node_modules/devalue/src/base64.js
+/**
+* Base64 Encodes an arraybuffer
+* @param {ArrayBuffer} arraybuffer
+* @returns {string}
+*/
+function encode64(arraybuffer) {
+	const dv = new DataView(arraybuffer);
+	let binaryString = "";
+	for (let i = 0; i < arraybuffer.byteLength; i++) binaryString += String.fromCharCode(dv.getUint8(i));
+	return binaryToAscii(binaryString);
+}
+/**
+* Decodes a base64 string into an arraybuffer
+* @param {string} string
+* @returns {ArrayBuffer}
+*/
+function decode64(string) {
+	const binaryString = asciiToBinary(string);
+	const arraybuffer = new ArrayBuffer(binaryString.length);
+	const dv = new DataView(arraybuffer);
+	for (let i = 0; i < arraybuffer.byteLength; i++) dv.setUint8(i, binaryString.charCodeAt(i));
+	return arraybuffer;
+}
+const KEY_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+/**
+* Substitute for atob since it's deprecated in node.
+* Does not do any input validation.
+*
+* @see https://github.com/jsdom/abab/blob/master/lib/atob.js
+*
+* @param {string} data
+* @returns {string}
+*/
+function asciiToBinary(data) {
+	if (data.length % 4 === 0) data = data.replace(/==?$/, "");
+	let output = "";
+	let buffer = 0;
+	let accumulatedBits = 0;
+	for (let i = 0; i < data.length; i++) {
+		buffer <<= 6;
+		buffer |= KEY_STRING.indexOf(data[i]);
+		accumulatedBits += 6;
+		if (accumulatedBits === 24) {
+			output += String.fromCharCode((buffer & 16711680) >> 16);
+			output += String.fromCharCode((buffer & 65280) >> 8);
+			output += String.fromCharCode(buffer & 255);
+			buffer = accumulatedBits = 0;
+		}
+	}
+	if (accumulatedBits === 12) {
+		buffer >>= 4;
+		output += String.fromCharCode(buffer);
+	} else if (accumulatedBits === 18) {
+		buffer >>= 2;
+		output += String.fromCharCode((buffer & 65280) >> 8);
+		output += String.fromCharCode(buffer & 255);
+	}
+	return output;
+}
+/**
+* Substitute for btoa since it's deprecated in node.
+* Does not do any input validation.
+*
+* @see https://github.com/jsdom/abab/blob/master/lib/btoa.js
+*
+* @param {string} str
+* @returns {string}
+*/
+function binaryToAscii(str) {
+	let out = "";
+	for (let i = 0; i < str.length; i += 3) {
+		/** @type {[number, number, number, number]} */
+		const groupsOfSix = [
+			void 0,
+			void 0,
+			void 0,
+			void 0
+		];
+		groupsOfSix[0] = str.charCodeAt(i) >> 2;
+		groupsOfSix[1] = (str.charCodeAt(i) & 3) << 4;
+		if (str.length > i + 1) {
+			groupsOfSix[1] |= str.charCodeAt(i + 1) >> 4;
+			groupsOfSix[2] = (str.charCodeAt(i + 1) & 15) << 2;
+		}
+		if (str.length > i + 2) {
+			groupsOfSix[2] |= str.charCodeAt(i + 2) >> 6;
+			groupsOfSix[3] = str.charCodeAt(i + 2) & 63;
+		}
+		for (let j = 0; j < groupsOfSix.length; j++) if (typeof groupsOfSix[j] === "undefined") out += "=";
+		else out += KEY_STRING[groupsOfSix[j]];
+	}
+	return out;
+}
+
+//#endregion
+//#region node_modules/devalue/src/constants.js
+const UNDEFINED = -1;
+const HOLE = -2;
+const NAN = -3;
+const POSITIVE_INFINITY = -4;
+const NEGATIVE_INFINITY = -5;
+const NEGATIVE_ZERO = -6;
+
+//#endregion
 //#region src/nix.ts
 async function packages() {
-	const path_info = await getExecOutput("nix", [
+	const info = await getExecOutput("nix", [
 		"path-info",
 		"--all",
 		"--json",
 		"--json-format",
 		"2"
 	], { silent: true });
-	const parsed = JSON.parse(path_info.stdout);
-	const packages = [];
+	const parsed = JSON.parse(info.stdout);
+	const packages = /* @__PURE__ */ new Map();
 	for (const [name, info] of Object.entries(parsed.info)) {
 		if (name.endsWith(".drv")) continue;
-		packages.push({
-			name,
-			...info
-		});
+		packages.set(name, info);
 	}
 	return packages;
 }
-async function verify(pkg, store) {
+async function verify(name, pkg, store) {
 	return await exec("nix", [
 		"store",
 		"verify",
@@ -17528,7 +17630,7 @@ async function verify(pkg, store) {
 		"--no-trust",
 		"--store",
 		store,
-		`${pkg.storeDir}/${pkg.name}`
+		`${pkg.storeDir}/${name}`
 	], {
 		silent: true,
 		ignoreReturnCode: true
@@ -17563,4 +17665,4 @@ async function substituters() {
 }
 
 //#endregion
-export { getIDToken as a, info as c, startGroup as d, exec as f, endGroup as i, saveState as l, substituters as n, getInput as o, which as p, verify as r, getState as s, packages as t, setFailed as u };
+export { saveState as _, NAN as a, exec as b, POSITIVE_INFINITY as c, encode64 as d, endGroup as f, info as g, getState as h, HOLE as i, UNDEFINED as l, getInput as m, substituters as n, NEGATIVE_INFINITY as o, getIDToken as p, verify as r, NEGATIVE_ZERO as s, packages as t, decode64 as u, setFailed as v, which as x, startGroup as y };

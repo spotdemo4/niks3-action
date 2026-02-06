@@ -6,7 +6,7 @@ export type ContentAddress = {
 	method: string;
 };
 
-export type Path = {
+export type Package = {
 	ca: ContentAddress;
 	deriver: string | null;
 	narHash: string;
@@ -19,36 +19,30 @@ export type Path = {
 	version: number;
 };
 
-export type Package = Path & {
-	name: string;
-};
-
 export async function packages() {
-	const path_info = await getExecOutput(
+	const info = await getExecOutput(
 		"nix",
 		["path-info", "--all", "--json", "--json-format", "2"],
 		{
 			silent: true,
 		},
 	);
-	const parsed: { info: Record<string, Path> } = JSON.parse(path_info.stdout);
+	const parsed: { info: Record<string, Package> } = JSON.parse(info.stdout);
 
-	const packages: Package[] = [];
+	const packages = new Map<string, Package>();
 	for (const [name, info] of Object.entries(parsed.info)) {
+		// Skip derivations
 		if (name.endsWith(".drv")) {
 			continue;
 		}
 
-		packages.push({
-			name,
-			...info,
-		});
+		packages.set(name, info);
 	}
 
 	return packages;
 }
 
-export async function verify(pkg: Package, store: string) {
+export async function verify(name: string, pkg: Package, store: string) {
 	const code = await exec(
 		"nix",
 		[
@@ -58,7 +52,7 @@ export async function verify(pkg: Package, store: string) {
 			"--no-trust",
 			"--store",
 			store,
-			`${pkg.storeDir}/${pkg.name}`,
+			`${pkg.storeDir}/${name}`,
 		],
 		{
 			silent: true,
@@ -69,6 +63,7 @@ export async function verify(pkg: Package, store: string) {
 }
 
 export async function substituters() {
+	// Get all substituters from nix config
 	const config = await getExecOutput(
 		"nix",
 		["config", "show", "substituters"],
@@ -82,6 +77,7 @@ export async function substituters() {
 		return configSubs;
 	}
 
+	// Get all substituters from flake.nix
 	const flake = await getExecOutput(
 		"nix",
 		["eval", "--json", "--file", "flake.nix", "nixConfig"],
