@@ -19,6 +19,10 @@ inputs:
   inputs-from:
     description: "Override the flake inputs of `github:Mic92/niks3`"
     required: false
+  max-concurrent-uploads:
+    description: "Maximum concurrent uploads"
+    required: false
+    default: "10"
 
 runs:
   using: node24

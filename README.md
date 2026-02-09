@@ -66,3 +66,7 @@ Niks3 audience for OIDC authentication
 ### `inputs-from`
 
 Override the flake inputs of `github:Mic92/niks3`
+
+### `max-concurrent-uploads`
+
+Maximum concurrent uploads (default: 10)

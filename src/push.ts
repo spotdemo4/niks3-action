@@ -41,6 +41,10 @@ async function main() {
 		auth_token = core.getInput("auth-token", { required: true });
 	}
 
+	const max_concurrent_uploads = core.getInput("max-concurrent-uploads", {
+		required: false,
+	});
+
 	core.startGroup(`Pushing ${paths.size} packages to cache`);
 	await exec.exec("niks3", [
 		"push",
@@ -48,6 +52,8 @@ async function main() {
 		server_url,
 		"--auth-token",
 		auth_token,
+		"--max-concurrent-uploads",
+		max_concurrent_uploads || "10",
 		...paths,
 	]);
 	core.endGroup();
