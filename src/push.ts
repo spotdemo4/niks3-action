@@ -23,9 +23,20 @@ async function main() {
 		paths.add(`${pkg.storeDir}/${name}`);
 	}
 
+	let server_url: string;
+	let auth_token: string;
+	const audience = core.getInput("audience", { required: false });
+	if (audience) {
+		core.info("Using OIDC authentication");
+		server_url = audience;
+		auth_token = await core.getIDToken(audience);
+	} else {
+		core.info("Using token authentication");
+		server_url = core.getInput("server-url", { required: true });
+		auth_token = core.getInput("auth-token", { required: true });
+	}
+
 	core.startGroup(`Pushing ${paths.size} packages to cache`);
-	const server_url = core.getState("server-url");
-	const auth_token = core.getState("auth-token");
 	for (const path of paths) {
 		await exec.exec("niks3", [
 			"push",

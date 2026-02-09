@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { c as info, d as setFailed, f as startGroup, i as endGroup, p as exec, s as getState, t as packages } from "./nix-L5xASWm5.js";
+import { a as getIDToken, c as info, d as setFailed, f as startGroup, i as endGroup, o as getInput, p as exec, s as getState, t as packages } from "./nix-L5xASWm5.js";
 
 //#region src/push.ts
 async function main() {
@@ -13,9 +13,19 @@ async function main() {
 		if (init.has(name)) continue;
 		paths.add(`${pkg.storeDir}/${name}`);
 	}
+	let server_url;
+	let auth_token;
+	const audience = getInput("audience", { required: false });
+	if (audience) {
+		info("Using OIDC authentication");
+		server_url = audience;
+		auth_token = await getIDToken(audience);
+	} else {
+		info("Using token authentication");
+		server_url = getInput("server-url", { required: true });
+		auth_token = getInput("auth-token", { required: true });
+	}
 	startGroup(`Pushing ${paths.size} packages to cache`);
-	const server_url = getState("server-url");
-	const auth_token = getState("auth-token");
 	for (const path of paths) await exec("niks3", [
 		"push",
 		"--server-url",

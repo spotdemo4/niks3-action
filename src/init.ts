@@ -12,16 +12,11 @@ async function main() {
 	const audience = core.getInput("audience", { required: false });
 	if (audience) {
 		core.info("Using OIDC authentication");
-		const id_token = await core.getIDToken(audience);
-
-		core.saveState("server-url", audience);
-		core.saveState("auth-token", id_token);
+		await core.getIDToken(audience);
 	} else {
-		const server_url = core.getInput("server-url", { required: true });
-		const auth_token = core.getInput("auth-token", { required: true });
-
-		core.saveState("server-url", server_url);
-		core.saveState("auth-token", auth_token);
+		core.info("Using token authentication");
+		core.getInput("server-url", { required: true });
+		core.getInput("auth-token", { required: true });
 	}
 
 	try {

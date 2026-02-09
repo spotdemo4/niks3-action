@@ -1827,24 +1827,25 @@ function _getGlobal(key, defaultValue) {
 
 //#endregion
 //#region src/niks3.ts
+const version = "1.3.0";
 async function download() {
-	if (process.platform === "darwin") if (process.arch === "arm64") return await downloadTool("https://github.com/Mic92/niks3/releases/download/v1.3.0/niks3_Darwin_arm64.tar.gz");
-	else if (process.arch === "x64") return await downloadTool("https://github.com/Mic92/niks3/releases/download/v1.3.0/niks3_Darwin_x86_64.tar.gz");
+	if (process.platform === "darwin") if (process.arch === "arm64") return await downloadTool(`https://github.com/Mic92/niks3/releases/download/v${version}/niks3_Darwin_arm64.tar.gz`);
+	else if (process.arch === "x64") return await downloadTool(`https://github.com/Mic92/niks3/releases/download/v${version}/niks3_Darwin_x86_64.tar.gz`);
 	else throw new Error(`Unsupported architecture: ${process.arch}`);
-	else if (process.platform === "linux") if (process.arch === "arm64") return await downloadTool("https://github.com/Mic92/niks3/releases/download/v1.3.0/niks3_Linux_arm64.tar.gz");
-	else if (process.arch === "x64") return await downloadTool("https://github.com/Mic92/niks3/releases/download/v1.3.0/niks3_Linux_x86_64.tar.gz");
+	else if (process.platform === "linux") if (process.arch === "arm64") return await downloadTool(`https://github.com/Mic92/niks3/releases/download/v${version}/niks3_Linux_arm64.tar.gz`);
+	else if (process.arch === "x64") return await downloadTool(`https://github.com/Mic92/niks3/releases/download/v${version}/niks3_Linux_x86_64.tar.gz`);
 	else throw new Error(`Unsupported architecture: ${process.arch}`);
 	else throw new Error(`Unsupported platform: ${process.platform}`);
 }
 async function install() {
-	const findPath = find("niks3", "1.3.0", process.arch);
+	const findPath = find("niks3", version, process.arch);
 	if (findPath) {
 		addPath(findPath);
 		return;
 	}
 	const archivePath = await download();
 	const extractedPath = await extractTar(archivePath);
-	const cachedPath = await cacheDir(extractedPath, "niks3", "1.3.0", process.arch);
+	const cachedPath = await cacheDir(extractedPath, "niks3", version, process.arch);
 	addPath(cachedPath);
 }
 
@@ -1857,14 +1858,11 @@ async function main() {
 	const audience = getInput("audience", { required: false });
 	if (audience) {
 		info("Using OIDC authentication");
-		const id_token = await getIDToken(audience);
-		saveState("server-url", audience);
-		saveState("auth-token", id_token);
+		await getIDToken(audience);
 	} else {
-		const server_url = getInput("server-url", { required: true });
-		const auth_token = getInput("auth-token", { required: true });
-		saveState("server-url", server_url);
-		saveState("auth-token", auth_token);
+		info("Using token authentication");
+		getInput("server-url", { required: true });
+		getInput("auth-token", { required: true });
 	}
 	try {
 		await which("niks3", true);
