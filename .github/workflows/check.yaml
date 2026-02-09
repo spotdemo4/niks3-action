@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: spotdemo4/nix-init@e007104fa840f028e46ef5b24520ee14dda33cec # v1.26.0
 
-      - name: Setup Niks3 cache
+      - name: Setup niks3 cache
         uses: spotdemo4/niks3-action@main
         with:
           server-url: https://niks3.trev.zip
@@ -32,13 +32,12 @@ jobs:
   oidc:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       id-token: write
     steps:
       - name: Checkout
         uses: spotdemo4/nix-init@e007104fa840f028e46ef5b24520ee14dda33cec # v1.26.0
 
-      - name: Setup Niks3 cache
+      - name: Setup niks3 cache
         uses: spotdemo4/niks3-action@main
         with:
           audience: https://niks3.trev.zip

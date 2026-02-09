@@ -1,5 +1,4 @@
-import { existsSync } from "node:fs";
-import { exec, getExecOutput } from "@actions/exec";
+import * as exec from "@actions/exec";
 
 export type ContentAddress = {
 	hash: string;
@@ -20,7 +19,7 @@ export type Package = {
 };
 
 export async function packages() {
-	const info = await getExecOutput(
+	const info = await exec.getExecOutput(
 		"nix",
 		["path-info", "--all", "--json", "--json-format", "2"],
 		{
@@ -40,51 +39,4 @@ export async function packages() {
 	}
 
 	return packages;
-}
-
-export async function verify(name: string, pkg: Package, store: string) {
-	const code = await exec(
-		"nix",
-		["path-info", "--store", store, `${pkg.storeDir}/${name}`],
-		{
-			silent: true,
-			ignoreReturnCode: true,
-		},
-	);
-	return code === 0;
-}
-
-export async function substituters() {
-	// Get all substituters from nix config
-	const config = await getExecOutput(
-		"nix",
-		["config", "show", "substituters"],
-		{
-			silent: true,
-		},
-	);
-	const configSubs = config.stdout.split(" ").map((s) => s.trim());
-
-	if (!existsSync("flake.nix")) {
-		return configSubs;
-	}
-
-	// Get all substituters from flake.nix
-	const flake = await getExecOutput(
-		"nix",
-		["eval", "--json", "--file", "flake.nix", "nixConfig"],
-		{
-			silent: true,
-			ignoreReturnCode: true,
-		},
-	);
-	if (flake.exitCode !== 0) {
-		return configSubs;
-	}
-
-	const parsed = JSON.parse(flake.stdout);
-	const flakeSubs: string[] = parsed.substituters || [];
-	const flakeExtraSubs: string[] = parsed["extra-substituters"] || [];
-
-	return [...new Set([...configSubs, ...flakeSubs, ...flakeExtraSubs])];
 }

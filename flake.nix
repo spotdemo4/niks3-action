@@ -179,10 +179,6 @@
           };
         };
 
-        apps = pkgs.lib.mkApps {
-          dev.script = "npm run dev";
-        };
-
         formatter = pkgs.nixfmt-tree;
       }
     );
