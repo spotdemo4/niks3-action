@@ -21,7 +21,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/niks3.ts$/"],
+      "managerFilePatterns": ["src/niks3.ts"],
       "matchStrings": [
         "const version = \"(?<currentValue>.*)\" // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
       ],
