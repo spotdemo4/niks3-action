@@ -28,34 +28,39 @@ async function main() {
 		return;
 	}
 
-	let server_url: string;
-	let auth_token: string;
+	let server_url = core.getInput("server-url", { required: false });
+	let auth_token = core.getInput("auth-token", { required: false });
 	const audience = core.getInput("audience", { required: false });
-	if (audience) {
-		core.info("Using OIDC authentication");
-		server_url = audience;
-		auth_token = await core.getIDToken(audience);
-	} else {
-		core.info("Using token authentication");
-		server_url = core.getInput("server-url", { required: true });
-		auth_token = core.getInput("auth-token", { required: true });
-	}
-
 	const max_concurrent_uploads = core.getInput("max-concurrent-uploads", {
 		required: false,
 	});
 
 	core.startGroup(`Pushing ${paths.size} packages to cache`);
-	await exec.exec("niks3", [
-		"push",
-		"--server-url",
-		server_url,
-		"--auth-token",
-		auth_token,
-		"--max-concurrent-uploads",
-		max_concurrent_uploads || "10",
-		...paths,
-	]);
+
+	for (const path of paths) {
+		if (audience) {
+			server_url = audience;
+			auth_token = await core.getIDToken(audience);
+		}
+
+		await exec.exec(
+			"niks3",
+			[
+				"push",
+				"--server-url",
+				server_url,
+				"--auth-token",
+				auth_token,
+				"--max-concurrent-uploads",
+				max_concurrent_uploads || "30",
+				path,
+			],
+			{
+				ignoreReturnCode: true,
+			},
+		);
+	}
+
 	core.endGroup();
 }
 
