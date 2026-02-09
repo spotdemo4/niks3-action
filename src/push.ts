@@ -23,6 +23,11 @@ async function main() {
 		paths.add(`${pkg.storeDir}/${name}`);
 	}
 
+	if (paths.size === 0) {
+		core.info("No new packages to push");
+		return;
+	}
+
 	let server_url: string;
 	let auth_token: string;
 	const audience = core.getInput("audience", { required: false });

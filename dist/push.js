@@ -13,6 +13,10 @@ async function main() {
 		if (init.has(name)) continue;
 		paths.add(`${pkg.storeDir}/${name}`);
 	}
+	if (paths.size === 0) {
+		info("No new packages to push");
+		return;
+	}
 	let server_url;
 	let auth_token;
 	const audience = getInput("audience", { required: false });
