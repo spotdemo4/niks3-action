@@ -20,7 +20,7 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@main
 
       - name: Setup niks3 cache
-        uses: spotdemo4/niks3-action@v0.0.3
+        uses: spotdemo4/niks3-action@v0.0.4
         with:
           server-url: https://niks3.trev.zip
           auth-token: ${{ secrets.NIKS3_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
       - uses: DeterminateSystems/determinate-nix-action@main
 
       - name: Setup niks3 cache
-        uses: spotdemo4/niks3-action@v0.0.3
+        uses: spotdemo4/niks3-action@v0.0.4
         with:
           audience: https://niks3.trev.zip
 
