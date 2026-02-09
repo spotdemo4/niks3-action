@@ -37,16 +37,14 @@ async function main() {
 	}
 
 	core.startGroup(`Pushing ${paths.size} packages to cache`);
-	for (const path of paths) {
-		await exec.exec("niks3", [
-			"push",
-			"--server-url",
-			server_url,
-			"--auth-token",
-			auth_token,
-			path,
-		]);
-	}
+	await exec.exec("niks3", [
+		"push",
+		"--server-url",
+		server_url,
+		"--auth-token",
+		auth_token,
+		...paths,
+	]);
 	core.endGroup();
 }
 
