@@ -23,7 +23,7 @@
       "customType": "regex",
       "managerFilePatterns": ["src/niks3.ts"],
       "matchStrings": [
-        "const version = \"(?<currentValue>.*)\" // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
+        "const version = \"(?<currentValue>.*)\"; // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
       ],
       "datasourceTemplate": "github-tags"
     }

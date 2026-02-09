@@ -56,6 +56,7 @@
               # util
               bumper
               flake-release
+              renovate
             ];
           };
 
