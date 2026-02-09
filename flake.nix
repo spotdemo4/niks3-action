@@ -78,7 +78,7 @@
             packages = with pkgs; [
               renovate
 
-              # npm i
+              # npm run build
               node
             ];
           };

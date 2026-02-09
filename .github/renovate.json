@@ -6,6 +6,7 @@
   "requireConfig": "ignored",
   "platform": "github",
   "repositories": ["spotdemo4/niks3-action"],
+  "allowedCommands": ["npm run build"],
 
   // repository
   "extends": ["config:recommended"],
@@ -17,6 +18,16 @@
   "nix": {
     "enabled": true
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/niks3.ts$/"],
+      "matchStrings": [
+        "const version = \"(?<currentValue>.*)\" // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
+      ],
+      "datasourceTemplate": "github-tags"
+    }
+  ],
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
@@ -34,6 +45,12 @@
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "node packages"
+    },
+    {
+      "matchManagers": ["npm", "custom.regex"],
+      "postUpgradeTasks": {
+        "commands": ["npm run build"]
+      }
     }
   ]
 }
