@@ -9,6 +9,7 @@ import * as path from "path";
 import * as http from "http";
 import * as https from "https";
 import * as events from "events";
+import { ok } from "assert";
 import { StringDecoder } from "string_decoder";
 import * as child from "child_process";
 import { setTimeout as setTimeout$1 } from "timers";
@@ -16690,8 +16691,26 @@ var __awaiter$5 = void 0 && (void 0).__awaiter || function(thisArg, _arguments, 
 		step((generator = generator.apply(thisArg, _arguments || [])).next());
 	});
 };
-const { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
+const { chmod, copyFile: copyFile$1, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
 const IS_WINDOWS$1 = process.platform === "win32";
+/**
+* Custom implementation of readlink to ensure Windows junctions
+* maintain trailing backslash for backward compatibility with Node.js < 24
+*
+* In Node.js 20, Windows junctions (directory symlinks) always returned paths
+* with trailing backslashes. Node.js 24 removed this behavior, which breaks
+* code that relied on this format for path operations.
+*
+* This implementation restores the Node 20 behavior by adding a trailing
+* backslash to all junction results on Windows.
+*/
+function readlink(fsPath) {
+	return __awaiter$5(this, void 0, void 0, function* () {
+		const result = yield fs.promises.readlink(fsPath);
+		if (IS_WINDOWS$1 && !result.endsWith("\\")) return `${result}\\`;
+		return result;
+	});
+}
 const READONLY = fs.constants.O_RDONLY;
 function exists(fsPath) {
 	return __awaiter$5(this, void 0, void 0, function* () {
@@ -16804,6 +16823,64 @@ var __awaiter$4 = void 0 && (void 0).__awaiter || function(thisArg, _arguments, 
 	});
 };
 /**
+* Copies a file or folder.
+* Based off of shelljs - https://github.com/shelljs/shelljs/blob/9237f66c52e5daa40458f94f9565e18e8132f5a6/src/cp.js
+*
+* @param     source    source path
+* @param     dest      destination path
+* @param     options   optional. See CopyOptions.
+*/
+function cp(source_1, dest_1) {
+	return __awaiter$4(this, arguments, void 0, function* (source, dest, options = {}) {
+		const { force, recursive, copySourceDirectory } = readCopyOptions(options);
+		const destStat = (yield exists(dest)) ? yield stat(dest) : null;
+		if (destStat && destStat.isFile() && !force) return;
+		const newDest = destStat && destStat.isDirectory() && copySourceDirectory ? path.join(dest, path.basename(source)) : dest;
+		if (!(yield exists(source))) throw new Error(`no such file or directory: ${source}`);
+		if ((yield stat(source)).isDirectory()) if (!recursive) throw new Error(`Failed to copy. ${source} is a directory, but tried to copy without recursive flag.`);
+		else yield cpDirRecursive(source, newDest, 0, force);
+		else {
+			if (path.relative(source, newDest) === "") throw new Error(`'${newDest}' and '${source}' are the same file`);
+			yield copyFile(source, newDest, force);
+		}
+	});
+}
+/**
+* Remove a path recursively with force
+*
+* @param inputPath path to remove
+*/
+function rmRF(inputPath) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		if (IS_WINDOWS$1) {
+			if (/[*"<>|]/.test(inputPath)) throw new Error("File path must not contain `*`, `\"`, `<`, `>` or `|` on Windows");
+		}
+		try {
+			yield rm(inputPath, {
+				force: true,
+				maxRetries: 3,
+				recursive: true,
+				retryDelay: 300
+			});
+		} catch (err) {
+			throw new Error(`File was unable to be removed ${err}`);
+		}
+	});
+}
+/**
+* Make a directory.  Creates the full path with folders in between
+* Will throw if it fails
+*
+* @param   fsPath        path to create
+* @returns Promise<void>
+*/
+function mkdirP(fsPath) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		ok(fsPath, "a path argument must be provided");
+		yield mkdir(fsPath, { recursive: true });
+	});
+}
+/**
 * Returns path of a tool had the tool actually been invoked.  Resolves via paths.
 * If you check and the tool does not exist, it will throw.
 *
@@ -16853,6 +16930,45 @@ function findInPath(tool) {
 			if (filePath) matches.push(filePath);
 		}
 		return matches;
+	});
+}
+function readCopyOptions(options) {
+	return {
+		force: options.force == null ? true : options.force,
+		recursive: Boolean(options.recursive),
+		copySourceDirectory: options.copySourceDirectory == null ? true : Boolean(options.copySourceDirectory)
+	};
+}
+function cpDirRecursive(sourceDir, destDir, currentDepth, force) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		if (currentDepth >= 255) return;
+		currentDepth++;
+		yield mkdirP(destDir);
+		const files = yield readdir(sourceDir);
+		for (const fileName of files) {
+			const srcFile = `${sourceDir}/${fileName}`;
+			const destFile = `${destDir}/${fileName}`;
+			if ((yield lstat(srcFile)).isDirectory()) yield cpDirRecursive(srcFile, destFile, currentDepth, force);
+			else yield copyFile(srcFile, destFile, force);
+		}
+		yield chmod(destDir, (yield stat(sourceDir)).mode);
+	});
+}
+function copyFile(srcFile, destFile, force) {
+	return __awaiter$4(this, void 0, void 0, function* () {
+		if ((yield lstat(srcFile)).isSymbolicLink()) {
+			try {
+				yield lstat(destFile);
+				yield unlink(destFile);
+			} catch (e) {
+				if (e.code === "EPERM") {
+					yield chmod(destFile, "0666");
+					yield unlink(destFile);
+				}
+			}
+			const symlinkFull = yield readlink(srcFile);
+			yield symlink(symlinkFull, destFile, IS_WINDOWS$1 ? "junction" : null);
+		} else if (!(yield exists(destFile)) || force) yield copyFile$1(srcFile, destFile);
 	});
 }
 
@@ -17412,6 +17528,15 @@ function setSecret(secret) {
 	issueCommand("add-mask", {}, secret);
 }
 /**
+* Prepends inputPath to the PATH (for this action and future actions)
+* @param inputPath
+*/
+function addPath(inputPath) {
+	if (process.env["GITHUB_PATH"] || "") issueFileCommand("PATH", inputPath);
+	else issueCommand("add-path", {}, inputPath);
+	process.env["PATH"] = `${inputPath}${path.delimiter}${process.env["PATH"]}`;
+}
+/**
 * Gets the value of an input.
 * Unless trimWhitespace is set to false in InputOptions, the value is also trimmed.
 * Returns an empty string if the value is not defined.
@@ -17434,6 +17559,12 @@ function getInput(name, options) {
 function setFailed(message) {
 	process.exitCode = ExitCode.Failure;
 	error(message);
+}
+/**
+* Gets whether Actions Step Debug is on or not
+*/
+function isDebug() {
+	return process.env["RUNNER_DEBUG"] === "1";
 }
 /**
 * Writes debug message to user log
@@ -17518,4 +17649,4 @@ async function packages() {
 }
 
 //#endregion
-export { getState as a, setFailed as c, which as d, getInput as i, startGroup as l, endGroup as n, info as o, getIDToken as r, saveState as s, packages as t, exec as u };
+export { which as _, getIDToken as a, __toESM as b, info as c, setFailed as d, startGroup as f, rmRF as g, mkdirP as h, endGroup as i, isDebug as l, cp as m, addPath as n, getInput as o, exec as p, debug as r, getState as s, packages as t, saveState as u, HttpClient as v, __commonJSMin as y };

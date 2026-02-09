@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as io from "@actions/io";
+import * as niks3 from "./niks3.ts";
 import * as nix from "./nix.ts";
 
 async function main() {
@@ -28,8 +29,10 @@ async function main() {
 		core.info("Niks3 is already installed, skipping installation");
 	} catch {
 		core.startGroup("Installing niks3");
+
 		const inputs = core.getInput("inputs-from");
 		if (inputs) {
+			// Install using nix profile
 			await exec.exec("nix", [
 				"profile",
 				"add",
@@ -38,8 +41,10 @@ async function main() {
 				"github:Mic92/niks3",
 			]);
 		} else {
-			await exec.exec("nix", ["profile", "add", "github:Mic92/niks3"]);
+			// Install using tool-cache
+			await niks3.install();
 		}
+
 		core.endGroup();
 	}
 }
