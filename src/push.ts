@@ -10,13 +10,13 @@ async function main() {
 	core.info("Filtering packages");
 	const paths = new Set<string>();
 	for (const [name, pkg] of now) {
-		// Don't cache packages that were there before the action started
-		if (init.has(name)) {
+		// Don't cache packages that aren't built locally
+		if (!pkg.ultimate) {
 			continue;
 		}
 
-		// Don't cache packages that aren't built locally
-		if (!pkg.ultimate) {
+		// Don't cache packages that were there before the action started
+		if (init.has(name)) {
 			continue;
 		}
 

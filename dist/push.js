@@ -9,8 +9,8 @@ async function main() {
 	info("Filtering packages");
 	const paths = /* @__PURE__ */ new Set();
 	for (const [name, pkg] of now) {
-		if (init.has(name)) continue;
 		if (!pkg.ultimate) continue;
+		if (init.has(name)) continue;
 		paths.add(`${pkg.storeDir}/${name}`);
 	}
 	startGroup(`Pushing ${paths.size} packages to cache`);
