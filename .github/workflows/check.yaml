@@ -25,6 +25,7 @@ jobs:
         with:
           server-url: https://niks3.trev.zip
           auth-token: ${{ secrets.NIKS3_TOKEN }}
+          inputs-from: .
 
       - name: Check flake
         run: nix flake check
