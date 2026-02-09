@@ -12,7 +12,6 @@ import * as events from "events";
 import { StringDecoder } from "string_decoder";
 import * as child from "child_process";
 import { setTimeout as setTimeout$1 } from "timers";
-import { existsSync } from "node:fs";
 
 //#region \0rolldown/runtime.js
 var __create = Object.create;
@@ -17500,111 +17499,6 @@ function getIDToken(aud) {
 }
 
 //#endregion
-//#region node_modules/devalue/src/base64.js
-/**
-* Base64 Encodes an arraybuffer
-* @param {ArrayBuffer} arraybuffer
-* @returns {string}
-*/
-function encode64(arraybuffer) {
-	const dv = new DataView(arraybuffer);
-	let binaryString = "";
-	for (let i = 0; i < arraybuffer.byteLength; i++) binaryString += String.fromCharCode(dv.getUint8(i));
-	return binaryToAscii(binaryString);
-}
-/**
-* Decodes a base64 string into an arraybuffer
-* @param {string} string
-* @returns {ArrayBuffer}
-*/
-function decode64(string) {
-	const binaryString = asciiToBinary(string);
-	const arraybuffer = new ArrayBuffer(binaryString.length);
-	const dv = new DataView(arraybuffer);
-	for (let i = 0; i < arraybuffer.byteLength; i++) dv.setUint8(i, binaryString.charCodeAt(i));
-	return arraybuffer;
-}
-const KEY_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-/**
-* Substitute for atob since it's deprecated in node.
-* Does not do any input validation.
-*
-* @see https://github.com/jsdom/abab/blob/master/lib/atob.js
-*
-* @param {string} data
-* @returns {string}
-*/
-function asciiToBinary(data) {
-	if (data.length % 4 === 0) data = data.replace(/==?$/, "");
-	let output = "";
-	let buffer = 0;
-	let accumulatedBits = 0;
-	for (let i = 0; i < data.length; i++) {
-		buffer <<= 6;
-		buffer |= KEY_STRING.indexOf(data[i]);
-		accumulatedBits += 6;
-		if (accumulatedBits === 24) {
-			output += String.fromCharCode((buffer & 16711680) >> 16);
-			output += String.fromCharCode((buffer & 65280) >> 8);
-			output += String.fromCharCode(buffer & 255);
-			buffer = accumulatedBits = 0;
-		}
-	}
-	if (accumulatedBits === 12) {
-		buffer >>= 4;
-		output += String.fromCharCode(buffer);
-	} else if (accumulatedBits === 18) {
-		buffer >>= 2;
-		output += String.fromCharCode((buffer & 65280) >> 8);
-		output += String.fromCharCode(buffer & 255);
-	}
-	return output;
-}
-/**
-* Substitute for btoa since it's deprecated in node.
-* Does not do any input validation.
-*
-* @see https://github.com/jsdom/abab/blob/master/lib/btoa.js
-*
-* @param {string} str
-* @returns {string}
-*/
-function binaryToAscii(str) {
-	let out = "";
-	for (let i = 0; i < str.length; i += 3) {
-		/** @type {[number, number, number, number]} */
-		const groupsOfSix = [
-			void 0,
-			void 0,
-			void 0,
-			void 0
-		];
-		groupsOfSix[0] = str.charCodeAt(i) >> 2;
-		groupsOfSix[1] = (str.charCodeAt(i) & 3) << 4;
-		if (str.length > i + 1) {
-			groupsOfSix[1] |= str.charCodeAt(i + 1) >> 4;
-			groupsOfSix[2] = (str.charCodeAt(i + 1) & 15) << 2;
-		}
-		if (str.length > i + 2) {
-			groupsOfSix[2] |= str.charCodeAt(i + 2) >> 6;
-			groupsOfSix[3] = str.charCodeAt(i + 2) & 63;
-		}
-		for (let j = 0; j < groupsOfSix.length; j++) if (typeof groupsOfSix[j] === "undefined") out += "=";
-		else out += KEY_STRING[groupsOfSix[j]];
-	}
-	return out;
-}
-
-//#endregion
-//#region node_modules/devalue/src/constants.js
-const UNDEFINED = -1;
-const HOLE = -2;
-const NAN = -3;
-const POSITIVE_INFINITY = -4;
-const NEGATIVE_INFINITY = -5;
-const NEGATIVE_ZERO = -6;
-
-//#endregion
 //#region src/nix.ts
 async function packages() {
 	const info = await getExecOutput("nix", [
@@ -17622,44 +17516,6 @@ async function packages() {
 	}
 	return packages;
 }
-async function verify(name, pkg, store) {
-	return await exec("nix", [
-		"path-info",
-		"--store",
-		store,
-		`${pkg.storeDir}/${name}`
-	], {
-		silent: true,
-		ignoreReturnCode: true
-	}) === 0;
-}
-async function substituters() {
-	const configSubs = (await getExecOutput("nix", [
-		"config",
-		"show",
-		"substituters"
-	], { silent: true })).stdout.split(" ").map((s) => s.trim());
-	if (!existsSync("flake.nix")) return configSubs;
-	const flake = await getExecOutput("nix", [
-		"eval",
-		"--json",
-		"--file",
-		"flake.nix",
-		"nixConfig"
-	], {
-		silent: true,
-		ignoreReturnCode: true
-	});
-	if (flake.exitCode !== 0) return configSubs;
-	const parsed = JSON.parse(flake.stdout);
-	const flakeSubs = parsed.substituters || [];
-	const flakeExtraSubs = parsed["extra-substituters"] || [];
-	return [...new Set([
-		...configSubs,
-		...flakeSubs,
-		...flakeExtraSubs
-	])];
-}
 
 //#endregion
-export { saveState as _, NAN as a, exec as b, POSITIVE_INFINITY as c, encode64 as d, endGroup as f, info as g, getState as h, HOLE as i, UNDEFINED as l, getInput as m, substituters as n, NEGATIVE_INFINITY as o, getIDToken as p, verify as r, NEGATIVE_ZERO as s, packages as t, decode64 as u, setFailed as v, which as x, startGroup as y };
+export { getState as a, setFailed as c, which as d, getInput as i, startGroup as l, endGroup as n, info as o, getIDToken as r, saveState as s, packages as t, exec as u };

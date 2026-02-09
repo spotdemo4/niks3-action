@@ -1,13 +1,12 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as io from "@actions/io";
-import * as devalue from "devalue";
 import * as nix from "./nix.ts";
 
 async function main() {
 	core.info("Collecting packages");
 	const packages = await nix.packages();
-	core.saveState("packages", devalue.stringify(new Set(packages.keys())));
+	core.saveState("packages", JSON.stringify(Array.from(packages.keys())));
 
 	const audience = core.getInput("audience", { required: false });
 	if (audience) {
