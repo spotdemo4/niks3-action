@@ -26,13 +26,13 @@ async function main() {
 		auth_token = getInput("auth-token", { required: true });
 	}
 	startGroup(`Pushing ${paths.size} packages to cache`);
-	for (const path of paths) await exec("niks3", [
+	await exec("niks3", [
 		"push",
 		"--server-url",
 		server_url,
 		"--auth-token",
 		auth_token,
-		path
+		...paths
 	]);
 	endGroup();
 }
