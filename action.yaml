@@ -1,5 +1,5 @@
 name: niks3-action
-description: Pushes uncached Nix packages to a binary cache with Niks3
+description: Pushes built Nix packages to a binary cache with Niks3
 author: trev
 
 branding:

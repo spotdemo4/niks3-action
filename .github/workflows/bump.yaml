@@ -37,4 +37,4 @@ jobs:
         env:
           FORCE: ${{ inputs.force }}
           PATHS: |-
-            .github/README.md
+            README.md
