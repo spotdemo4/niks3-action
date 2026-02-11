@@ -1861,9 +1861,12 @@ async function main() {
 		getInput("auth-token", { required: true });
 		server = getInput("server-url", { required: true });
 	}
-	info("Checking connectivity to server");
-	const resp = await new HttpClient().head(server);
-	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to server ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
+	info(`Checking connectivity to ${server}`);
+	const client = new HttpClient();
+	const resp = await client.head(server);
+	client.dispose();
+	resp.message.destroy();
+	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
 	info("Collecting packages");
 	const packages$1 = await packages();
 	saveState("packages", JSON.stringify(Array.from(packages$1.keys())));

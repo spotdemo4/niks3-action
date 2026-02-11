@@ -6,7 +6,7 @@
   "requireConfig": "ignored",
   "platform": "github",
   "repositories": ["spotdemo4/niks3-action"],
-  "allowedCommands": ["npm i && npm run build"],
+  "allowedCommands": ["npm i", "npm run build"],
 
   // repository
   "extends": ["config:recommended"],
@@ -49,7 +49,7 @@
     {
       "matchManagers": ["npm", "custom.regex"],
       "postUpgradeTasks": {
-        "commands": ["npm i && npm run build"]
+        "commands": ["npm i", "npm run build"]
       }
     }
   ]
