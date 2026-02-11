@@ -64,7 +64,6 @@ async function main() {
 		args.push(path);
 
 		core.info(path);
-		core.info(nix.name(path));
 		await exec.exec("niks3", args, {
 			ignoreReturnCode: true,
 			silent: !core.isDebug(),
