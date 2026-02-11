@@ -9,7 +9,6 @@ async function main() {
 		return;
 	}
 
-	core.info(chalk.italic("Getting packages"));
 	const init: Set<string> = new Set(JSON.parse(core.getState("packages")));
 	const now = await nix.packages();
 	const paths = new Set<string>();
