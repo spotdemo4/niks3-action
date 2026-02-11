@@ -3,6 +3,11 @@ import * as exec from "@actions/exec";
 import * as nix from "./nix.ts";
 
 async function main() {
+	if (core.getState("state") !== "ok") {
+		core.info("Did not successfully initialize, skipping push");
+		return;
+	}
+
 	core.info("Collecting packages");
 	const init: Set<string> = new Set(JSON.parse(core.getState("packages")));
 	const now = await nix.packages();

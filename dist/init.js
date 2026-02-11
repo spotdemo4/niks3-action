@@ -1852,18 +1852,21 @@ async function install() {
 //#endregion
 //#region src/init.ts
 async function main() {
+	let server = getInput("audience", { required: false });
+	if (server) {
+		info("Using OIDC authentication");
+		await getIDToken(server);
+	} else {
+		info("Using token authentication");
+		getInput("auth-token", { required: true });
+		server = getInput("server-url", { required: true });
+	}
+	info("Checking connectivity to server");
+	const resp = await new HttpClient().head(server);
+	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to server ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
 	info("Collecting packages");
 	const packages$1 = await packages();
 	saveState("packages", JSON.stringify(Array.from(packages$1.keys())));
-	const audience = getInput("audience", { required: false });
-	if (audience) {
-		info("Using OIDC authentication");
-		await getIDToken(audience);
-	} else {
-		info("Using token authentication");
-		getInput("server-url", { required: true });
-		getInput("auth-token", { required: true });
-	}
 	try {
 		await which("niks3", true);
 		info("Niks3 is already installed, skipping installation");
@@ -1880,6 +1883,7 @@ async function main() {
 		else await install();
 		endGroup();
 	}
+	saveState("state", "ok");
 }
 try {
 	await main();

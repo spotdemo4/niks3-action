@@ -3,6 +3,10 @@ import { a as getIDToken, c as info, d as setFailed, f as startGroup, i as endGr
 
 //#region src/push.ts
 async function main() {
+	if (getState("state") !== "ok") {
+		info("Did not successfully initialize, skipping push");
+		return;
+	}
 	info("Collecting packages");
 	const init = new Set(JSON.parse(getState("packages")));
 	const now = await packages();
