@@ -55,7 +55,7 @@ export async function validate(store: string) {
 	return info.exitCode === 0;
 }
 
-const pathRegex = /(?<store>.*)\/(?<hash>.*?)-(?<name>.*)/g;
+const pathRegex = /(?<store>.*)\/(?<hash>.*?)-(?<name>.*)/;
 
 export function format(path: string) {
 	const match = pathRegex.exec(path);
