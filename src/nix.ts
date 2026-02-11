@@ -63,7 +63,7 @@ export function format(path: string) {
 		return path;
 	}
 
-	return chalk.bgWhite.gray(
-		`${match.groups.store}/${chalk.black(match.groups.hash)}-${chalk.black.bold(match.groups.name)}`,
+	return chalk.gray(
+		`${match.groups.store}/${chalk.reset.white(match.groups.hash)}-${chalk.reset.white.bold(match.groups.name)}`,
 	);
 }
