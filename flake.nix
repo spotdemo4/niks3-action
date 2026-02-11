@@ -90,7 +90,7 @@
               # node
               node
 
-              # nix
+              # flake
               flake-checker
 
               # actions

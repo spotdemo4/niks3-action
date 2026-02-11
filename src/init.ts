@@ -17,7 +17,10 @@ async function main() {
 	}
 
 	core.info(`Checking connectivity to ${server}`);
-	const head = await new httpc.HttpClient("niks3-action")
+	const client = new httpc.HttpClient("niks3-action", undefined, {
+		allowRedirects: false,
+	});
+	const head = await client
 		.head(server)
 		.then((r) => r.readBody().then(() => r.message));
 	if (!head.statusCode || head.statusCode >= 400) {

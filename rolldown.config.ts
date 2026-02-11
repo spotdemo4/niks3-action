@@ -6,7 +6,7 @@ export default defineConfig({
 	tsconfig: true,
 	output: {
 		dir: "dist",
-		banner: "#!/usr/bin/env node",
 		cleanDir: true,
+		minify: true,
 	},
 });
