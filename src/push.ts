@@ -37,7 +37,7 @@ async function main() {
 	const max = core.getInput("max-concurrent-uploads", { required: false });
 	const verify = core.getInput("verify-s3-integrity", { required: false });
 
-	core.startGroup(`Pushing ${paths.size} packages to cache`);
+	core.startGroup(`Pushing ${paths.size} packages to cache...`);
 	for (const path of paths) {
 		const args = ["push"];
 
@@ -63,7 +63,8 @@ async function main() {
 		}
 		args.push(path);
 
-		core.info(`Pushing ${nix.name(path)} to cache...`);
+		core.info(path);
+		core.info(nix.name(path));
 		await exec.exec("niks3", args, {
 			ignoreReturnCode: true,
 			silent: !core.isDebug(),
