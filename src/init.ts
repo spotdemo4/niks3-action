@@ -2,11 +2,9 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as httpc from "@actions/http-client";
 import * as io from "@actions/io";
-import { Chalk } from "chalk";
+import chalk from "./chalk.ts";
 import * as niks3 from "./niks3.ts";
 import * as nix from "./nix.ts";
-
-const chalk = new Chalk({ level: 2 });
 
 async function main() {
 	let server = core.getInput("audience", { required: false });
@@ -41,7 +39,7 @@ async function main() {
 		}
 	}
 
-	core.info("Collecting packages");
+	core.info("Getting packages");
 	const packages = await nix.packages();
 	core.saveState("packages", JSON.stringify(Array.from(packages.keys())));
 
@@ -65,6 +63,7 @@ async function main() {
 		core.endGroup();
 	}
 
+	core.info(chalk.green("Successfully installed niks3"));
 	core.saveState("state", "ok");
 }
 

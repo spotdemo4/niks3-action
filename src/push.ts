@@ -1,9 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import { Chalk } from "chalk";
+import chalk from "./chalk.ts";
 import * as nix from "./nix.ts";
-
-const chalk = new Chalk({ level: 2 });
 
 async function main() {
 	if (core.getState("state") !== "ok") {
@@ -11,7 +9,7 @@ async function main() {
 		return;
 	}
 
-	core.info("Collecting packages");
+	core.info("Getting packages");
 	const init: Set<string> = new Set(JSON.parse(core.getState("packages")));
 	const now = await nix.packages();
 	const paths = new Set<string>();
@@ -40,7 +38,9 @@ async function main() {
 	const max = core.getInput("max-concurrent-uploads", { required: false });
 	const verify = core.getInput("verify-s3-integrity", { required: false });
 
-	core.info(chalk.cyan(`Pushing ${chalk.bold(paths.size)} packages to cache`));
+	core.info(
+		`Pushing ${chalk.bold(paths.size)} ${paths.size > 1 ? "packages" : "package"} to cache`,
+	);
 	for (const path of paths) {
 		const args = ["push"];
 
@@ -78,6 +78,12 @@ async function main() {
 		}
 		core.endGroup();
 	}
+
+	core.info(
+		chalk.green(
+			`Pushed ${chalk.bold(paths.size)} ${paths.size > 1 ? "packages" : "package"} to cache`,
+		),
+	);
 }
 
 try {

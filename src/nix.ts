@@ -1,7 +1,5 @@
 import * as exec from "@actions/exec";
-import { Chalk } from "chalk";
-
-const chalk = new Chalk({ level: 2 });
+import chalk from "./chalk.ts";
 
 export type ContentAddress = {
 	hash: string;
@@ -65,5 +63,7 @@ export function format(path: string) {
 		return path;
 	}
 
-	return `${match.groups.store}/${chalk.magenta(match.groups.hash)}-${chalk.cyan(match.groups.name)}`;
+	return chalk.dim(
+		`${match.groups.store}/${chalk.reset(match.groups.hash)}-${chalk.reset.bold(match.groups.name)}`,
+	);
 }
