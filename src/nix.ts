@@ -63,7 +63,7 @@ export function format(path: string) {
 		return path;
 	}
 
-	return chalk.dim(
-		`${match.groups.store}/${chalk.reset(match.groups.hash)}-${chalk.reset.bold(match.groups.name)}`,
+	return chalk.bgWhite.gray(
+		`${match.groups.store}/${chalk.black(match.groups.hash)}-${chalk.black.bold(match.groups.name)}`,
 	);
 }

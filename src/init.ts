@@ -29,6 +29,7 @@ async function main() {
 			`Failed to connect to ${server}: ${head.statusCode} ${head.statusMessage}`,
 		);
 	}
+	core.info(chalk.green(`Connected to ${chalk.italic(server)}`));
 
 	if (head.statusCode === 301 && head.headers.location) {
 		core.info(`Validating store ${chalk.italic(head.headers.location)}`);
@@ -37,6 +38,9 @@ async function main() {
 				`Failed to validate store ${head.headers.location}: does not appear to be a binary cache`,
 			);
 		}
+		core.info(
+			chalk.green(`Store ${chalk.italic(head.headers.location)} is valid`),
+		);
 	}
 
 	core.info("Getting packages");
