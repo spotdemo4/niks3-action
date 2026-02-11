@@ -19,8 +19,7 @@ async function main() {
 	core.info(`Checking connectivity to ${server}`);
 	const client = new httpc.HttpClient();
 	const resp = await client.head(server);
-	// client.dispose();
-	// resp.message.destroy();
+	resp.message.destroy();
 	if (!resp.message.statusCode || resp.message.statusCode >= 400) {
 		throw new Error(
 			`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`,
