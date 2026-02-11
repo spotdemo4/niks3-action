@@ -30,10 +30,10 @@ async function main() {
 	}
 
 	if (head.statusCode === 301 && head.headers.location) {
-		core.info(`Checking connectivity to ${head.headers.location}`);
-		if (!nix.info(head.headers.location)) {
+		core.info(`Validating store ${head.headers.location}`);
+		if (!nix.validate(head.headers.location)) {
 			throw new Error(
-				`Failed to connect to ${head.headers.location}: does not appear to be a binary cache`,
+				`Failed to validate store ${head.headers.location}: does not appear to be a binary cache`,
 			);
 		}
 	}
@@ -42,12 +42,9 @@ async function main() {
 	const packages = await nix.packages();
 	core.saveState("packages", JSON.stringify(Array.from(packages.keys())));
 
-	try {
-		await io.which("niks3", true);
-		core.info("Niks3 is already installed, skipping installation");
-	} catch {
+	const path = await io.which("niks3");
+	if (!path) {
 		core.startGroup("Installing niks3");
-
 		const inputs = core.getInput("inputs-from");
 		if (inputs) {
 			// Install using nix profile
@@ -62,7 +59,6 @@ async function main() {
 			// Install using tool-cache
 			await niks3.install();
 		}
-
 		core.endGroup();
 	}
 
