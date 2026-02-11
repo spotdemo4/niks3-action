@@ -17,7 +17,7 @@ async function main() {
 		server = core.getInput("server-url", { required: true });
 	}
 
-	core.info(chalk.italic(`Checking connectivity to ${server}...`));
+	core.info(chalk.italic(`Checking connectivity to ${server}`));
 	const client = new httpc.HttpClient("niks3-action", undefined, {
 		allowRedirects: false,
 	});
@@ -29,26 +29,26 @@ async function main() {
 			`Failed to connect to ${server}: ${head.statusCode} ${head.statusMessage}`,
 		);
 	}
-	core.info(chalk.green(`Connected.`));
+	core.info(chalk.green(`Connected to ${server}`));
 
 	if (head.statusCode === 301 && head.headers.location) {
-		core.info(chalk.italic(`Validating store ${head.headers.location}...`));
+		core.info(chalk.italic(`Validating store ${head.headers.location}`));
 		if (!nix.validate(head.headers.location)) {
 			throw new Error(
 				`Failed to validate store ${head.headers.location}: does not appear to be a binary cache`,
 			);
 		}
-		core.info(chalk.green(`Valid.`));
+		core.info(chalk.green(`Store ${head.headers.location} is valid`));
 	}
 
-	core.info(chalk.italic("Getting packages..."));
+	core.info(chalk.italic("Getting packages"));
 	const packages = await nix.packages();
 	core.saveState("packages", JSON.stringify(Array.from(packages.keys())));
-	core.info(chalk.green(`Ignoring ${chalk.bold(packages.size)} packages.`));
+	core.info(`Ignoring ${chalk.bold(packages.size)} packages.`);
 
 	const path = await io.which("niks3");
 	if (!path) {
-		core.startGroup(chalk.italic("Installing niks3..."));
+		core.startGroup(chalk.italic("Installing niks3"));
 		const inputs = core.getInput("inputs-from");
 		if (inputs) {
 			// Install using nix profile
@@ -66,7 +66,7 @@ async function main() {
 		core.endGroup();
 	}
 
-	core.info(chalk.green("Initialization complete."));
+	core.info(chalk.green("Successfully installed niks3"));
 	core.saveState("state", "ok");
 }
 

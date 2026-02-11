@@ -64,6 +64,6 @@ export function format(path: string) {
 	}
 
 	return chalk.gray(
-		`${match.groups.store}/${chalk.reset.white(match.groups.hash)}-${chalk.reset.white.bold(match.groups.name)}`,
+		`${match.groups.store}/${chalk.reset.white(match.groups.hash)}${chalk.reset.gray("-")}${chalk.reset.white.bold(match.groups.name)}`,
 	);
 }

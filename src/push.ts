@@ -9,7 +9,7 @@ async function main() {
 		return;
 	}
 
-	core.info(chalk.italic("Getting packages..."));
+	core.info(chalk.italic("Getting packages"));
 	const init: Set<string> = new Set(JSON.parse(core.getState("packages")));
 	const now = await nix.packages();
 	const paths = new Set<string>();
@@ -32,9 +32,7 @@ async function main() {
 		return;
 	}
 	core.info(
-		chalk.green(
-			`Filtered through ${chalk.bold(now.size)} ${now.size > 1 ? "packages" : "package"}`,
-		),
+		`Filtered through ${chalk.bold(now.size)} ${now.size > 1 ? "packages" : "package"}`,
 	);
 
 	const server_url = core.getInput("server-url", { required: false });
@@ -84,7 +82,7 @@ async function main() {
 		core.endGroup();
 	}
 
-	core.info(chalk.green(`Push complete.`));
+	core.info(chalk.green(`Push complete`));
 }
 
 try {
