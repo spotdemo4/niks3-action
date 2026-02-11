@@ -1863,7 +1863,7 @@ async function main() {
 	}
 	info(`Checking connectivity to ${server}`);
 	const resp = await new HttpClient().head(server);
-	resp.message.destroy();
+	await resp.readBody();
 	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
 	info("Collecting packages");
 	const packages$1 = await packages();
