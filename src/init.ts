@@ -17,12 +17,22 @@ async function main() {
 	}
 
 	core.info(`Checking connectivity to ${server}`);
-	const resp = await new httpc.HttpClient().head(server);
-	await resp.readBody();
-	if (!resp.message.statusCode || resp.message.statusCode >= 400) {
+	const head = await new httpc.HttpClient("niks3-action")
+		.head(server)
+		.then((r) => r.readBody().then(() => r.message));
+	if (!head.statusCode || head.statusCode >= 400) {
 		throw new Error(
-			`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`,
+			`Failed to connect to ${server}: ${head.statusCode} ${head.statusMessage}`,
 		);
+	}
+
+	if (head.statusCode === 301 && head.headers.location) {
+		core.info(`Checking connectivity to ${head.headers.location}`);
+		if (!nix.info(head.headers.location)) {
+			throw new Error(
+				`Failed to connect to ${head.headers.location}: does not appear to be a binary cache`,
+			);
+		}
 	}
 
 	core.info("Collecting packages");

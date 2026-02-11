@@ -17585,7 +17585,7 @@ function error(message, properties = {}) {
 * Writes info to log with console.log.
 * @param message info message
 */
-function info(message) {
+function info$1(message) {
 	process.stdout.write(message + os$1.EOL);
 }
 /**
@@ -17647,6 +17647,17 @@ async function packages() {
 	}
 	return packages;
 }
+async function info(store) {
+	return (await getExecOutput("nix", [
+		"store",
+		"info",
+		"--store",
+		store
+	], {
+		silent: true,
+		ignoreReturnCode: true
+	})).exitCode === 0;
+}
 
 //#endregion
-export { which as _, getIDToken as a, __toESM as b, info as c, setFailed as d, startGroup as f, rmRF as g, mkdirP as h, endGroup as i, isDebug as l, cp as m, addPath as n, getInput as o, exec as p, debug as r, getState as s, packages as t, saveState as u, HttpClient as v, __commonJSMin as y };
+export { rmRF as _, endGroup as a, __commonJSMin as b, getState as c, saveState as d, setFailed as f, mkdirP as g, cp as h, debug as i, info$1 as l, exec as m, packages as n, getIDToken as o, startGroup as p, addPath as r, getInput as s, info as t, isDebug as u, which as v, __toESM as x, HttpClient as y };

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { _ as which, a as getIDToken, b as __toESM, c as info, d as setFailed, f as startGroup, g as rmRF, h as mkdirP, i as endGroup, l as isDebug, m as cp, n as addPath, o as getInput, p as exec, r as debug, t as packages, u as saveState, v as HttpClient, y as __commonJSMin } from "./nix-L5xASWm5.js";
+import { _ as rmRF, a as endGroup, b as __commonJSMin, d as saveState, f as setFailed, g as mkdirP, h as cp, i as debug, l as info, m as exec, n as packages, o as getIDToken, p as startGroup, r as addPath, s as getInput, t as info$1, u as isDebug, v as which, x as __toESM, y as HttpClient } from "./nix-Bkpj9XPo.js";
 import * as os$1 from "os";
 import * as crypto from "crypto";
 import * as fs from "fs";
@@ -1862,9 +1862,12 @@ async function main() {
 		server = getInput("server-url", { required: true });
 	}
 	info(`Checking connectivity to ${server}`);
-	const resp = await new HttpClient().head(server);
-	await resp.readBody();
-	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
+	const head = await new HttpClient("niks3-action").head(server).then((r) => r.readBody().then(() => r.message));
+	if (!head.statusCode || head.statusCode >= 400) throw new Error(`Failed to connect to ${server}: ${head.statusCode} ${head.statusMessage}`);
+	if (head.statusCode === 301 && head.headers.location) {
+		info(`Checking connectivity to ${head.headers.location}`);
+		if (!info$1(head.headers.location)) throw new Error(`Failed to connect to ${head.headers.location}: does not appear to be a binary cache`);
+	}
 	info("Collecting packages");
 	const packages$1 = await packages();
 	saveState("packages", JSON.stringify(Array.from(packages$1.keys())));

@@ -40,3 +40,16 @@ export async function packages() {
 
 	return packages;
 }
+
+export async function info(store: string) {
+	const info = await exec.getExecOutput(
+		"nix",
+		["store", "info", "--store", store],
+		{
+			silent: true,
+			ignoreReturnCode: true,
+		},
+	);
+
+	return info.exitCode === 0;
+}
