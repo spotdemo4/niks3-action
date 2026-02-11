@@ -23,6 +23,10 @@ inputs:
     description: "Maximum concurrent uploads"
     required: false
     default: "30"
+  verify-s3-integrity:
+    description: "Verify that objects in database actually exist in S3 before skipping upload"
+    required: false
+    default: "false"
 
 runs:
   using: node24

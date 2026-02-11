@@ -11,8 +11,6 @@ async function main() {
 	core.info("Collecting packages");
 	const init: Set<string> = new Set(JSON.parse(core.getState("packages")));
 	const now = await nix.packages();
-
-	core.info("Filtering packages");
 	const paths = new Set<string>();
 	for (const [name, pkg] of now) {
 		// Don't cache packages that aren't built locally
@@ -33,39 +31,44 @@ async function main() {
 		return;
 	}
 
-	let server_url = core.getInput("server-url", { required: false });
-	let auth_token = core.getInput("auth-token", { required: false });
+	const server_url = core.getInput("server-url", { required: false });
+	const auth_token = core.getInput("auth-token", { required: false });
 	const audience = core.getInput("audience", { required: false });
-	const max_concurrent_uploads = core.getInput("max-concurrent-uploads", {
-		required: false,
-	});
+	const max = core.getInput("max-concurrent-uploads", { required: false });
+	const verify = core.getInput("verify-s3-integrity", { required: false });
 
 	core.startGroup(`Pushing ${paths.size} packages to cache`);
-
 	for (const path of paths) {
-		if (audience) {
-			server_url = audience;
-			auth_token = await core.getIDToken(audience);
-		}
+		const args = ["push"];
 
-		await exec.exec(
-			"niks3",
-			[
-				"push",
+		if (server_url && auth_token) {
+			args.push("--server-url", server_url, "--auth-token", auth_token);
+		} else if (audience) {
+			args.push(
 				"--server-url",
-				server_url,
+				audience,
 				"--auth-token",
-				auth_token,
-				"--max-concurrent-uploads",
-				max_concurrent_uploads || "30",
-				path,
-			],
-			{
-				ignoreReturnCode: true,
-			},
-		);
-	}
+				await core.getIDToken(audience),
+			);
+		} else {
+			throw new Error(
+				"Either server-url and auth-token or audience must be provided",
+			);
+		}
+		if (max) {
+			args.push("--max-concurrent-uploads", max);
+		}
+		if (verify.toLowerCase() === "true") {
+			args.push("--verify-s3-integrity");
+		}
+		args.push(path);
 
+		core.info(`Pushing ${nix.name(path)} to cache...`);
+		await exec.exec("niks3", args, {
+			ignoreReturnCode: true,
+			silent: !core.isDebug(),
+		});
+	}
 	core.endGroup();
 }
 

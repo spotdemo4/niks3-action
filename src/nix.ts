@@ -53,3 +53,14 @@ export async function validate(store: string) {
 
 	return info.exitCode === 0;
 }
+
+const pathRegex = /(?<store>.*)\/(?<hash>.*?)-(?<name>.*)/g;
+
+export function name(path: string) {
+	const match = pathRegex.exec(path);
+	if (!match || !match.groups) {
+		throw new Error(`Failed to parse store path ${path}`);
+	}
+
+	return match.groups.name;
+}
