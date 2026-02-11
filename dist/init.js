@@ -1862,9 +1862,7 @@ async function main() {
 		server = getInput("server-url", { required: true });
 	}
 	info(`Checking connectivity to ${server}`);
-	const client = new HttpClient();
-	const resp = await client.head(server);
-	client.dispose();
+	const resp = await new HttpClient().head(server);
 	resp.message.destroy();
 	if (!resp.message.statusCode || resp.message.statusCode >= 400) throw new Error(`Failed to connect to ${server}: ${resp.message.statusCode} ${resp.message.statusMessage}`);
 	info("Collecting packages");

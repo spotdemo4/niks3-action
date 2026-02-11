@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout
         uses: spotdemo4/nix-init@main
+        with:
+          audience: ""
 
       - name: Setup niks3 cache
         uses: spotdemo4/niks3-action@main
@@ -37,6 +39,8 @@ jobs:
     steps:
       - name: Checkout
         uses: spotdemo4/nix-init@main
+        with:
+          audience: ""
 
       - name: Setup niks3 cache
         uses: spotdemo4/niks3-action@main
