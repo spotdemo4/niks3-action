@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as httpc from "@actions/http-client";
 import * as io from "@actions/io";
+import chalk from "chalk";
 import * as niks3 from "./niks3.ts";
 import * as nix from "./nix.ts";
 
@@ -16,7 +17,7 @@ async function main() {
 		server = core.getInput("server-url", { required: true });
 	}
 
-	core.info(`Checking connectivity to ${server}`);
+	core.info(`Checking connectivity to ${chalk.italic(server)}`);
 	const client = new httpc.HttpClient("niks3-action", undefined, {
 		allowRedirects: false,
 	});
@@ -30,7 +31,7 @@ async function main() {
 	}
 
 	if (head.statusCode === 301 && head.headers.location) {
-		core.info(`Validating store ${head.headers.location}`);
+		core.info(`Validating store ${chalk.italic(head.headers.location)}`);
 		if (!nix.validate(head.headers.location)) {
 			throw new Error(
 				`Failed to validate store ${head.headers.location}: does not appear to be a binary cache`,

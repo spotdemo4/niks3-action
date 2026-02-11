@@ -5,7 +5,7 @@
 [![nix](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fspotdemo4%2Fniks3-action%2Frefs%2Fheads%2Fmain%2Fflake.lock&query=%24.nodes.nixpkgs.original.ref&logo=nixos&logoColor=%23bac2de&label=channel&labelColor=%23313244&color=%234d6fb7)](https://nixos.org/)
 [![node](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fspotdemo4%2Fniks3-action%2Frefs%2Fheads%2Fmain%2Fpackage.json&query=%24.engines.node&logo=nodedotjs&logoColor=%23bac2de&label=version&labelColor=%23313244&color=%23339933)](https://nodejs.org/en/about/previous-releases)
 
-Pushes built [Nix](https://nixos.org/) packages to a binary cache with [Niks3](https://github.com/Mic92/niks3)
+Pushes built [nix](https://nixos.org/) packages to a binary cache with [niks3](https://github.com/Mic92/niks3)
 
 ## Usage
 
@@ -70,3 +70,7 @@ Override the flake inputs of `github:Mic92/niks3`
 ### `max-concurrent-uploads`
 
 Maximum concurrent uploads (default: 30)
+
+### `verify-s3-integrity`
+
+Verify that objects in database actually exist in S3 before skipping upload (default: false)

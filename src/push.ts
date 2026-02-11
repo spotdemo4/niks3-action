@@ -1,10 +1,11 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import chalk from "chalk";
 import * as nix from "./nix.ts";
 
 async function main() {
 	if (core.getState("state") !== "ok") {
-		core.info("Did not successfully initialize, skipping push");
+		core.info(chalk.red("Did not successfully initialize, skipping push"));
 		return;
 	}
 
@@ -27,7 +28,7 @@ async function main() {
 	}
 
 	if (paths.size === 0) {
-		core.info("No new packages to push");
+		core.info(chalk.green("No new packages to push"));
 		return;
 	}
 
@@ -37,7 +38,7 @@ async function main() {
 	const max = core.getInput("max-concurrent-uploads", { required: false });
 	const verify = core.getInput("verify-s3-integrity", { required: false });
 
-	core.startGroup(`Pushing ${paths.size} packages to cache...`);
+	core.info(chalk.cyan(`Pushing ${chalk.bold(paths.size)} packages to cache`));
 	for (const path of paths) {
 		const args = ["push"];
 
@@ -61,15 +62,20 @@ async function main() {
 		if (verify.toLowerCase() === "true") {
 			args.push("--verify-s3-integrity");
 		}
+		if (core.isDebug()) {
+			args.push("--debug");
+		}
 		args.push(path);
 
-		core.info(path);
-		await exec.exec("niks3", args, {
+		core.startGroup(nix.format(path));
+		const code = await exec.exec("niks3", args, {
 			ignoreReturnCode: true,
-			silent: !core.isDebug(),
 		});
+		if (code !== 0) {
+			core.warning(`niks3 push failed for ${path}`);
+		}
+		core.endGroup();
 	}
-	core.endGroup();
 }
 
 try {

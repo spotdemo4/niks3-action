@@ -1,4 +1,5 @@
 import * as exec from "@actions/exec";
+import chalk from "chalk";
 
 export type ContentAddress = {
 	hash: string;
@@ -52,4 +53,15 @@ export async function validate(store: string) {
 	);
 
 	return info.exitCode === 0;
+}
+
+const pathRegex = /(?<store>.*)\/(?<hash>.*?)-(?<name>.*)/g;
+
+export function format(path: string) {
+	const match = pathRegex.exec(path);
+	if (!match?.groups?.store || !match?.groups?.hash || !match?.groups?.name) {
+		return path;
+	}
+
+	return `${match.groups.store}/${chalk.magenta(match.groups.hash)}-${chalk.cyan(match.groups.name)}`;
 }
