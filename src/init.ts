@@ -2,9 +2,11 @@ import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as httpc from "@actions/http-client";
 import * as io from "@actions/io";
-import chalk from "chalk";
+import { Chalk } from "chalk";
 import * as niks3 from "./niks3.ts";
 import * as nix from "./nix.ts";
+
+const chalk = new Chalk({ level: 2 });
 
 async function main() {
 	let server = core.getInput("audience", { required: false });

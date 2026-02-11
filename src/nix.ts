@@ -1,5 +1,7 @@
 import * as exec from "@actions/exec";
-import chalk from "chalk";
+import { Chalk } from "chalk";
+
+const chalk = new Chalk({ level: 2 });
 
 export type ContentAddress = {
 	hash: string;

@@ -1,7 +1,9 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import chalk from "chalk";
+import { Chalk } from "chalk";
 import * as nix from "./nix.ts";
+
+const chalk = new Chalk({ level: 2 });
 
 async function main() {
 	if (core.getState("state") !== "ok") {
