@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as tc from "@actions/tool-cache";
 
-const version = "1.3.0"; // github-tags/Mic92/niks3&versioning=semver
+const version = "1.4.0"; // github-tags/Mic92/niks3&versioning=semver
 
 async function download() {
 	if (process.platform === "darwin") {
