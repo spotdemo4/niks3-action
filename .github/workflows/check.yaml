@@ -17,7 +17,7 @@ jobs:
   token:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Initialize
         uses: spotdemo4/nix-init@757d5ba1fa0749e877484703bece0e17c7bd5670 # v1.43.0
         with:
           audience: ""
@@ -37,7 +37,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Checkout
+      - name: Initialize
         uses: spotdemo4/nix-init@757d5ba1fa0749e877484703bece0e17c7bd5670 # v1.43.0
         with:
           audience: ""

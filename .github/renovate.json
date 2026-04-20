@@ -6,14 +6,18 @@
 	"requireConfig": "ignored",
 	"platform": "github",
 	"repositories": ["spotdemo4/niks3-action"],
-	"allowedCommands": ["npm i", "npm run build"],
+	"allowedCommands": ["npm audit fix", "npm i", "npm run build"],
 
 	// repository
 	"extends": ["config:recommended"],
 	"lockFileMaintenance": {
 		"enabled": true,
 		"automerge": true,
-		"schedule": ["* * * * 0"] // sunday
+		"schedule": ["* * * * 0"], // sunday
+		"skipInstalls": false,
+		"postUpgradeTasks": {
+			"commands": ["npm audit fix"]
+		}
 	},
 	"nix": {
 		"enabled": true
@@ -34,17 +38,27 @@
 			"automerge": true
 		},
 		{
+			"matchManagers": ["npm"],
+			"rangeStrategy": "bump",
+			"postUpdateOptions": ["npmInstallTwice"]
+		},
+		{
+			"matchManagers": ["npm"],
+			"matchDepTypes": ["engines"],
+			"enabled": false
+		},
+		{
+			"matchManagers": ["npm"],
+			"matchUpdateTypes": ["minor", "patch"],
+			"groupName": "node packages"
+		},
+		{
 			"matchManagers": ["nix"],
 			"groupName": "nix inputs"
 		},
 		{
 			"matchManagers": ["github-actions"],
 			"groupName": "github actions"
-		},
-		{
-			"matchManagers": ["npm"],
-			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-			"groupName": "node packages"
 		},
 		{
 			"matchManagers": ["npm", "custom.regex"],
