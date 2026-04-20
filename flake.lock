@@ -2,11 +2,11 @@
   "nodes": {
     "nixpkgs": {
       "locked": {
-        "lastModified": 1773507054,
-        "narHash": "sha256-Q8U5VXgrcxmCxPtCCJCIZkcAX3FCZwGh1GNVIXxMND0=",
+        "lastModified": 1776329215,
+        "narHash": "sha256-a8BYi3mzoJ/AcJP8UldOx8emoPRLeWqALZWu4ZvjPXw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "e80236013dc8b77aa49ca90e7a12d86f5d8d64c9",
+        "rev": "b86751bc4085f48661017fa226dee99fab6c651b",
         "type": "github"
       },
       "original": {
@@ -23,13 +23,13 @@
         "trev": "trev"
       }
     },
-    "schemas": {
+    "schema": {
       "locked": {
-        "lastModified": 1773072327,
-        "narHash": "sha256-jffaEGY9Tt0IgiI1qHd/cXLeTMftOqpI/gtkS/J+Xg0=",
+        "lastModified": 1775244557,
+        "narHash": "sha256-iYXRXIX9eafJmwJFAhqT3YxvvpNRuPFSLRCSpvGh8Ic=",
         "owner": "DeterminateSystems",
         "repo": "flake-schemas",
-        "rev": "834aaadfc96174a3abd124cf3c9a7373c26d12ad",
+        "rev": "15edbeeaf77e42216dbcba8bfd907fdeabb75a2b",
         "type": "github"
       },
       "original": {
@@ -58,17 +58,17 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "schemas": "schemas",
+        "schema": "schema",
         "systems": [
           "systems"
         ]
       },
       "locked": {
-        "lastModified": 1773545229,
-        "narHash": "sha256-eB6xok5IoecbI9xja+NaG5t8ScfMgFdw4QPzeuXk1ss=",
+        "lastModified": 1776670613,
+        "narHash": "sha256-qV/VbD/oeLoz1K+YnqzqaC95LjW4WnJK0+XNAZncHp8=",
         "owner": "spotdemo4",
         "repo": "nur",
-        "rev": "cb6ebc5d2567751cb446be4c95f1265972e43c30",
+        "rev": "7d08801fd8bd365fcda1c5e4bdfa1aacd15cfcb4",
         "type": "github"
       },
       "original": {

@@ -22,31 +22,17 @@
 
   outputs =
     {
-      nixpkgs,
       trev,
       ...
     }:
     trev.libs.mkFlake (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            trev.overlays.packages
-            trev.overlays.libs
-          ];
-        };
-        fs = pkgs.lib.fileset;
-        node = pkgs.nodejs_24;
-      in
-      {
+      system: pkgs: {
         devShells = {
           default = pkgs.mkShell {
-            name = "dev";
             shellHook = pkgs.shellhook.ref;
             packages = with pkgs; [
               # node
-              node
+              nodejs_24
 
               # lint
               biome
@@ -56,7 +42,6 @@
               # util
               bumper
               flake-release
-              renovate
             ];
           };
 
@@ -78,43 +63,27 @@
             name = "update";
             packages = with pkgs; [
               renovate
-
-              # npm run build
-              node
+              nodejs_24 # npm run build
             ];
           };
 
           vulnerable = pkgs.mkShell {
             name = "vulnerable";
             packages = with pkgs; [
-              # node
-              node
-
-              # flake
-              flake-checker
-
-              # actions
-              octoscan
+              nodejs_24 # node
+              flake-checker # flake
+              zizmor # actions
             ];
           };
         };
 
-        checks = pkgs.lib.mkChecks {
-          node = {
-            src = fs.toSource {
-              root = ./.;
-              fileset = fs.unions [
-                ./.gitignore
-                ./.npmignore
-                ./biome.json
-                ./package-lock.json
-                ./package.json
-                ./rolldown.config.ts
-                ./tsconfig.json
-                ./src
-              ];
-            };
-            deps = with pkgs; [
+        checks = pkgs.mkChecks {
+          biome = {
+            root = ./.;
+            filter = file: file.hasExt "ts" || file.hasExt "json";
+            include = ./.gitignore;
+            ignore = ./dist;
+            packages = with pkgs; [
               biome
             ];
             script = ''
@@ -122,25 +91,26 @@
             '';
           };
 
-          nix = {
-            src = fs.toSource {
-              root = ./.;
-              fileset = fs.fileFilter (file: file.hasExt "nix") ./.;
-            };
-            deps = with pkgs; [
-              nixfmt-tree
+          actions = {
+            root = ./.;
+            files = [
+              ./action.yaml
+              ./.github/workflows
             ];
-            script = ''
-              treefmt --ci
+            packages = with pkgs; [
+              action-validator
+              zizmor
+            ];
+            forEach = ''
+              action-validator "$file"
+              zizmor "$file"
             '';
           };
 
           renovate = {
-            src = fs.toSource {
-              root = ./.github;
-              fileset = ./.github/renovate.json;
-            };
-            deps = with pkgs; [
+            root = ./.github;
+            files = ./.github/renovate.json;
+            packages = with pkgs; [
               renovate
             ];
             script = ''
@@ -148,39 +118,37 @@
             '';
           };
 
-          actions = {
-            src = fs.toSource {
-              root = ./.;
-              fileset = fs.unions [
-                ./action.yaml
-                ./.github/workflows
-              ];
-            };
-            deps = with pkgs; [
-              action-validator
-              octoscan
+          nix = {
+            root = ./.;
+            filter = file: file.hasExt "nix";
+            packages = with pkgs; [
+              nixfmt
             ];
-            script = ''
-              action-validator **/*.yaml
-              octoscan scan .
+            forEach = ''
+              nixfmt --check "$file"
             '';
           };
 
           prettier = {
-            src = fs.toSource {
-              root = ./.;
-              fileset = fs.fileFilter (file: file.hasExt "yaml" || file.hasExt "json" || file.hasExt "md") ./.;
-            };
-            deps = with pkgs; [
+            root = ./.;
+            filter = file: file.hasExt "yaml" || file.hasExt "md";
+            packages = with pkgs; [
               prettier
             ];
-            script = ''
-              prettier --check .
+            forEach = ''
+              prettier --check "$file"
             '';
           };
         };
 
-        formatter = pkgs.nixfmt-tree;
+        formatter = pkgs.treefmt.withConfig {
+          configFile = ./treefmt.toml;
+          runtimeInputs = with pkgs; [
+            biome
+            nixfmt
+            prettier
+          ];
+        };
       }
     );
 }

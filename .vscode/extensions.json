@@ -1,7 +1,7 @@
 {
-  "recommendations": [
-    "biomejs.biome",
-    "jnoortheen.nix-ide",
-    "esbenp.prettier-vscode"
-  ]
+	"recommendations": [
+		"biomejs.biome",
+		"jnoortheen.nix-ide",
+		"esbenp.prettier-vscode"
+	]
 }

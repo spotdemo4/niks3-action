@@ -1,56 +1,56 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-global-schema.json",
+	"$schema": "https://docs.renovatebot.com/renovate-global-schema.json",
 
-  // self-hosted
-  "onboarding": false,
-  "requireConfig": "ignored",
-  "platform": "github",
-  "repositories": ["spotdemo4/niks3-action"],
-  "allowedCommands": ["npm i", "npm run build"],
+	// self-hosted
+	"onboarding": false,
+	"requireConfig": "ignored",
+	"platform": "github",
+	"repositories": ["spotdemo4/niks3-action"],
+	"allowedCommands": ["npm i", "npm run build"],
 
-  // repository
-  "extends": ["config:recommended"],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true,
-    "schedule": ["* * * * 0"] // sunday
-  },
-  "nix": {
-    "enabled": true
-  },
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": ["src/niks3.ts"],
-      "matchStrings": [
-        "const version = \"(?<currentValue>.*)\"; // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
-      ],
-      "datasourceTemplate": "github-tags"
-    }
-  ],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "automerge": true
-    },
-    {
-      "matchManagers": ["nix"],
-      "groupName": "nix inputs"
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "groupName": "github actions"
-    },
-    {
-      "matchManagers": ["npm"],
-      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
-      "groupName": "node packages"
-    },
-    {
-      "matchManagers": ["npm", "custom.regex"],
-      "postUpgradeTasks": {
-        "commands": ["npm i", "npm run build"]
-      }
-    }
-  ]
+	// repository
+	"extends": ["config:recommended"],
+	"lockFileMaintenance": {
+		"enabled": true,
+		"automerge": true,
+		"schedule": ["* * * * 0"] // sunday
+	},
+	"nix": {
+		"enabled": true
+	},
+	"customManagers": [
+		{
+			"customType": "regex",
+			"managerFilePatterns": ["src/niks3.ts"],
+			"matchStrings": [
+				"const version = \"(?<currentValue>.*)\"; // github-tags/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s"
+			],
+			"datasourceTemplate": "github-tags"
+		}
+	],
+	"packageRules": [
+		{
+			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+			"automerge": true
+		},
+		{
+			"matchManagers": ["nix"],
+			"groupName": "nix inputs"
+		},
+		{
+			"matchManagers": ["github-actions"],
+			"groupName": "github actions"
+		},
+		{
+			"matchManagers": ["npm"],
+			"matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+			"groupName": "node packages"
+		},
+		{
+			"matchManagers": ["npm", "custom.regex"],
+			"postUpgradeTasks": {
+				"commands": ["npm i", "npm run build"]
+			}
+		}
+	]
 }

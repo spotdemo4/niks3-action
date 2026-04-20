@@ -18,12 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: spotdemo4/nix-init@main
+        uses: spotdemo4/nix-init@757d5ba1fa0749e877484703bece0e17c7bd5670 # v1.43.0
         with:
           audience: ""
 
       - name: Setup niks3 cache
-        uses: spotdemo4/niks3-action@main
+        uses: spotdemo4/niks3-action@main # zizmor: ignore[unpinned-uses]
         with:
           server-url: https://niks3.trev.zip
           auth-token: ${{ secrets.NIKS3_TOKEN }}
@@ -38,12 +38,12 @@ jobs:
       id-token: write
     steps:
       - name: Checkout
-        uses: spotdemo4/nix-init@main
+        uses: spotdemo4/nix-init@757d5ba1fa0749e877484703bece0e17c7bd5670 # v1.43.0
         with:
           audience: ""
 
       - name: Setup niks3 cache
-        uses: spotdemo4/niks3-action@main
+        uses: spotdemo4/niks3-action@main # zizmor: ignore[unpinned-uses]
         with:
           audience: https://niks3.trev.zip
 
