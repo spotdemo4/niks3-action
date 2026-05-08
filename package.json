@@ -13,7 +13,7 @@
 	"devDependencies": {
 		"@tsconfig/node-ts": "^23.6.4",
 		"@tsconfig/node24": "^24.0.4",
-		"@types/node": "^24.12.2",
+		"@types/node": "^24.12.3",
 		"rolldown": "^1.0.0",
 		"typescript": "^6.0.3"
 	},
